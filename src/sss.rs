@@ -7,7 +7,6 @@ use merkle_sigs::sign_data_vec;
 use rand::{OsRng, Rng};
 use share_format::format_share_for_signing;
 use share_format::share_string_from;
-use share_format::ShareFormatKind;
 use std::io;
 use std::iter::repeat;
 use validation::process_and_validate_shares;
@@ -16,7 +15,18 @@ fn new_vec<T: Clone>(n: usize, x: T) -> Vec<T> {
     repeat(x).take(n).collect()
 }
 
-/// Performs threshold k-out-of-n Shamir's secret sharing.
+/// Type of encoding to use on returned strings.
+///
+#[derive(Debug, Copy, Clone)]
+pub enum ShareFormatKind {
+    /// Use `SharedData` Protobuf
+    Protobuf,
+    /// Use JSON encoding of ShareDataJson struct.
+    Json,
+}
+
+
+/// Performs threshold k-out-of-n Shamir's secret sharing, returns Protobuf encoded strings.
 ///
 /// # Examples
 ///
@@ -32,7 +42,13 @@ fn new_vec<T: Clone>(n: usize, x: T) -> Vec<T> {
 /// 	Err(_) => {}// Deal with error}
 /// }
 /// ```
-pub fn generate_shares(k: u8, n: u8, secret: &[u8], sign_shares: bool, share_format: ShareFormatKind) -> io::Result<Vec<String>> {
+pub fn generate_shares(k: u8, n: u8, secret: &[u8], sign_shares: bool) -> io::Result<Vec<String>> {
+    generate_shares_format(k, n, secret, sign_shares, ShareFormatKind::Protobuf)
+}
+
+/// Performs threshold k-out-of-n Shamir's secret sharing, returns as Protobuf or JSON encoded base64 strings.
+///
+pub fn generate_shares_format(k: u8, n: u8, secret: &[u8], sign_shares: bool, share_format: ShareFormatKind) -> io::Result<Vec<String>> {
     if k > n {
         return Err(other_io_err("Threshold K can not be larger than N", None, None, None));
     }

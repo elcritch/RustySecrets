@@ -10,12 +10,8 @@ use share_data::ShareData;
 use std::error::Error;
 use json_share_data::ShareDataJson;
 use serde_json;
+use sss::ShareFormatKind;
 
-#[derive(Debug, Copy, Clone)]
-pub enum ShareFormatKind {
-    Protobuf,
-    Json,
-}
 
 type ParsedShare = Result<(Vec<u8>, u8, u8, Option<(Vec<Vec<u8>>, Proof<MerklePublicKey>)>), RustyError>;
 
