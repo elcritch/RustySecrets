@@ -8,6 +8,14 @@ use serialize;
 use serialize::base64::{self, FromBase64, ToBase64};
 use share_data::ShareData;
 use std::error::Error;
+use json_share_data::ShareDataJson;
+use serde_json;
+
+#[derive(Debug, Copy, Clone)]
+pub enum ShareFormatKind {
+    Protobuf,
+    Json,
+}
 
 type ParsedShare = Result<(Vec<u8>, u8, u8, Option<(Vec<Vec<u8>>, Proof<MerklePublicKey>)>), RustyError>;
 
@@ -15,7 +23,18 @@ fn base64_config() -> serialize::base64::Config {
     base64::Config { pad: false, ..base64::STANDARD }
 }
 
-pub fn share_string_from(share: Vec<u8>, threshold: u8, share_num: u8,
+pub fn share_string_from(share: Vec<u8>, threshold: u8, share_num: u8, serde_kind: ShareFormatKind,
+                         signature_pair: Option<(Vec<Vec<u8>>, Proof<MerklePublicKey>)>)
+                         -> String {
+    match serde_kind {
+        ShareFormatKind::Protobuf =>
+            profobuf_share_string_from(share, threshold, share_num, signature_pair),
+        ShareFormatKind::Json =>
+            json_share_string_from(share, threshold, share_num, signature_pair),
+    }
+}
+
+pub fn profobuf_share_string_from(share: Vec<u8>, threshold: u8, share_num: u8,
                          signature_pair: Option<(Vec<Vec<u8>>, Proof<MerklePublicKey>)>)
                          -> String {
     let mut share_protobuf = ShareData::new();
@@ -28,6 +47,29 @@ pub fn share_string_from(share: Vec<u8>, threshold: u8, share_num: u8,
     }
 
     let b64_share = share_protobuf.write_to_bytes().unwrap().to_base64(base64_config());
+    format!("{}-{}-{}", threshold, share_num, b64_share)
+}
+
+pub fn json_share_string_from(share: Vec<u8>, threshold: u8, share_num: u8,
+                         signature_pair: Option<(Vec<Vec<u8>>, Proof<MerklePublicKey>)>)
+                         -> String {
+    let mut share_json = ShareDataJson{
+        shamir_data: share,
+        signature: None,
+        proof: None,
+    };
+
+    if signature_pair.is_some() {
+        let (signature, proof) = signature_pair.unwrap();
+        share_json.signature = Some(signature);
+        share_json.proof = Some(proof.write_to_bytes().unwrap());
+    }
+
+    let share_json_str = serde_json::to_string(&share_json).unwrap();
+
+    println!("json share format: {}", share_json_str);
+
+    let b64_share = share_json_str.as_bytes().to_base64(base64_config());
     format!("{}-{}-{}", threshold, share_num, b64_share)
 }
 

@@ -31,7 +31,7 @@ A share is built out of three parts separated with a dash: K-N-D.
 
 There are a few issues with regular Shamir's secret sharing that we wanted to address:
 
-- a share can be corrupted or incorrectly entered. 
+- a share can be corrupted or incorrectly entered.
 - a malicious share holder can modify the secret that would be recovered by modifying his share.
 - a user has multiple shares from different secret shares and he doesn't know which one belongs to a specific instance.
 

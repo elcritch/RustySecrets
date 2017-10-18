@@ -6,6 +6,7 @@ use protobuf::Message;
 use secret::{RustySecret, RustySecretsVersions};
 use sss;
 use std::io;
+use share_format::ShareFormatKind;
 
 /// Performs threshold k-out-of-n Shamir's secret sharing.
 ///
@@ -32,7 +33,7 @@ pub fn generate_shares(k: u8, n: u8, secret: &[u8], mime_type: Option<String>, s
         rusty_secret.set_mime_type(mt);
     }
 
-    sss::generate_shares(k, n, rusty_secret.write_to_bytes().unwrap().as_slice(), sign_shares)
+    sss::generate_shares(k, n, rusty_secret.write_to_bytes().unwrap().as_slice(), sign_shares, ShareFormatKind::Protobuf)
 }
 
 /// Recovers the secret from a k-out-of-n Shamir's secret sharing.

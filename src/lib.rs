@@ -14,6 +14,12 @@ extern crate rand;
 extern crate merkle_sigs;
 extern crate ring;
 
+extern crate serde;
+extern crate serde_json;
+
+#[macro_use]
+extern crate serde_derive;
+
 use ring::digest::{Algorithm, SHA512};
 #[allow(non_upper_case_globals)]
 static digest: &'static Algorithm = &SHA512;
@@ -26,6 +32,7 @@ mod secret;
 #[allow(unused_qualifications)]
 mod share_data;
 mod share_format;
+mod json_share_data;
 mod validation;
 
 pub use custom_error::RustyError;

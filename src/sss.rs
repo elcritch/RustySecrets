@@ -7,6 +7,7 @@ use merkle_sigs::sign_data_vec;
 use rand::{OsRng, Rng};
 use share_format::format_share_for_signing;
 use share_format::share_string_from;
+use share_format::ShareFormatKind;
 use std::io;
 use std::iter::repeat;
 use validation::process_and_validate_shares;
@@ -31,7 +32,7 @@ fn new_vec<T: Clone>(n: usize, x: T) -> Vec<T> {
 /// 	Err(_) => {}// Deal with error}
 /// }
 /// ```
-pub fn generate_shares(k: u8, n: u8, secret: &[u8], sign_shares: bool) -> io::Result<Vec<String>> {
+pub fn generate_shares(k: u8, n: u8, secret: &[u8], sign_shares: bool, share_format: ShareFormatKind) -> io::Result<Vec<String>> {
     if k > n {
         return Err(other_io_err("Threshold K can not be larger than N", None, None, None));
     }
@@ -61,7 +62,7 @@ pub fn generate_shares(k: u8, n: u8, secret: &[u8], sign_shares: bool) -> io::Re
         shares.into_iter()
             .enumerate()
             .zip(signatures.unwrap_or_else(|| vec![None; n as usize]).into_iter()) {
-        let share_string = share_string_from(share, k, (index + 1) as u8, signature_pair);
+        let share_string = share_string_from(share, k, (index + 1) as u8, share_format, signature_pair);
         result.push(share_string);
     }
 
