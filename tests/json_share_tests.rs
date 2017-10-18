@@ -7,9 +7,9 @@ use rusty_secrets::sss::ShareFormatKind;
 
 #[test]
 fn test_generate_basic_share() {
-    let share1 = "some super duper secret".to_string().into_bytes();
+    let secret = "some super duper secret".to_string();
 
-    let shares = generate_shares_format(2, 2, &share1, false, ShareFormatKind::Json).unwrap();
+    let shares = generate_shares_format(2, 2, &secret.clone().into_bytes(), false, ShareFormatKind::Json).unwrap();
 
     println!("TEST_RESULT: test_generate_basic_share: {:?}", &shares);
 
@@ -26,7 +26,7 @@ fn test_generate_basic_share() {
 
     println!("TEST_RESULT: recover_secret: {}", recovered_str);
 
-    // assert_eq!(s.get_secret().to_owned(), secret);
+    assert_eq!(secret, recovered_str);
 }
 
 // #[test]
