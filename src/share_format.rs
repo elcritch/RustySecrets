@@ -64,9 +64,9 @@ pub fn json_share_string_from(share: Vec<u8>, threshold: u8, share_num: u8,
 
     let share_json_str = serde_json::to_string(&share_json).unwrap();
 
-    println!("json share format: struct: {:?}", share_json);
+    // println!("json share format: struct: {:?}", share_json);
 
-    println!("json share format: json: {}", share_json_str);
+    // println!("json share format: json: {}", share_json_str);
 
     let b64_share = share_json_str.as_bytes().to_base64(base64_config());
     format!("{}-{}-{}", threshold, share_num, b64_share)
@@ -140,7 +140,7 @@ fn protobuf_share_from_string(raw_data: Vec<u8>, index: u8, is_signed: bool, k: 
 fn json_share_from_string(raw_data: Vec<u8>, index: u8, is_signed: bool, k: u8, n: u8) -> ParsedShare {
     let json_data: ShareDataJson = serde_json::from_str(str::from_utf8(&raw_data).unwrap()).unwrap();
 
-    println!("json_share_from_string: {:?}", json_data);
+    // println!("json_share_from_string: {:?}", json_data);
 
     let share: Vec<u8> = decode(&json_data.shamir_data).unwrap();
 
