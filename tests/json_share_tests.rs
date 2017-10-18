@@ -1,17 +1,32 @@
 extern crate rusty_secrets;
 
 use rusty_secrets::sss::generate_shares_format;
+use rusty_secrets::sss::share_from_string;
+use rusty_secrets::sss::recover_secret_format;
 use rusty_secrets::sss::ShareFormatKind;
 
 #[test]
 fn test_generate_basic_share() {
     let share1 = "some super duper secret".to_string().into_bytes();
 
-    let res = generate_shares_format(2, 2, &share1, false, ShareFormatKind::Json).unwrap();
+    let shares = generate_shares_format(2, 2, &share1, false, ShareFormatKind::Json).unwrap();
 
-    println!("TEST_RESULT: test_generate_basic_share: {:?}", res);
+    println!("TEST_RESULT: test_generate_basic_share: {:?}", &shares);
 
-    assert_eq!(s.get_secret().to_owned(), secret);
+
+    for share in &shares {
+        let post_share = share_from_string(&share, 1, false, ShareFormatKind::Json);
+
+        println!("TEST_RESULT: test_generate_basic_share: {:?}", post_share);
+
+    }
+
+    let recovered: Vec<u8> = recover_secret_format(shares, false, ShareFormatKind::Json).unwrap();
+    let recovered_str: String = String::from_utf8(recovered).expect("Found invalid UTF-8");
+
+    println!("TEST_RESULT: recover_secret: {}", recovered_str);
+
+    // assert_eq!(s.get_secret().to_owned(), secret);
 }
 
 // #[test]

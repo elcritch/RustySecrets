@@ -7,6 +7,8 @@ use merkle_sigs::sign_data_vec;
 use rand::{OsRng, Rng};
 use share_format::format_share_for_signing;
 use share_format::share_string_from;
+use share_format::share_from_string_format;
+use share_format::ParsedShare;
 use std::io;
 use std::iter::repeat;
 use validation::process_and_validate_shares;
@@ -100,6 +102,12 @@ pub fn generate_shares_format(k: u8, n: u8, secret: &[u8], sign_shares: bool, sh
     Ok(result)
 }
 
+/// Create share from string
+///
+pub fn share_from_string(s: &str, index: u8, is_signed: bool, share_format: ShareFormatKind) ->  ParsedShare {
+     share_from_string_format(s, index, is_signed, share_format)
+}
+
 fn secret_share(src: &[u8], k: u8, n: u8) -> Result<Vec<Vec<u8>>, RustyError> {
     let mut result = Vec::with_capacity(n as usize);
     for _ in 0..(n as usize) {
@@ -143,7 +151,13 @@ fn secret_share(src: &[u8], k: u8, n: u8) -> Result<Vec<Vec<u8>>, RustyError> {
 /// }
 /// ```
 pub fn recover_secret(shares: Vec<String>, verify_signatures: bool) -> Result<Vec<u8>, RustyError> {
-    let (k, shares) = try!(process_and_validate_shares(shares, verify_signatures));
+    recover_secret_format(shares, verify_signatures, ShareFormatKind::Protobuf)
+}
+
+/// Recovers the secret from a k-out-of-n Shamir's secret sharing in specified format.
+///
+pub fn recover_secret_format(shares: Vec<String>, verify_signatures: bool, share_format: ShareFormatKind) -> Result<Vec<u8>, RustyError> {
+    let (k, shares) = try!(process_and_validate_shares(shares, verify_signatures, share_format));
 
     let slen = shares[0].1.len();
     let mut col_in = Vec::with_capacity(k as usize);

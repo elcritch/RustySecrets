@@ -5,6 +5,8 @@ use share_format::format_share_for_signing;
 use std::collections::HashMap;
 use std::error::Error;
 
+use sss::ShareFormatKind;
+
 type ProcessedShares = Result<(u8, Vec<(u8, Vec<u8>)>), RustyError>;
 
 // The order of validation that we think makes the most sense is the following:
@@ -14,7 +16,8 @@ type ProcessedShares = Result<(u8, Vec<(u8, Vec<u8>)>), RustyError>;
 // 3) Validate other properties, in no specific order
 
 pub fn process_and_validate_shares(shares_strings: Vec<String>,
-                                   verify_signatures: bool)
+                                   verify_signatures: bool,
+                                   share_format: ShareFormatKind)
                                    -> ProcessedShares {
     let mut shares: Vec<(u8, Vec<u8>)> = Vec::new();
 
@@ -23,9 +26,10 @@ pub fn process_and_validate_shares(shares_strings: Vec<String>,
 
     for (counter, line) in shares_strings.iter().enumerate() {
         let share_index = counter as u8;
-        let (share_data, k, n, sig_pair) = try!(share_format::share_from_string(line,
+        let (share_data, k, n, sig_pair) = try!(share_format::share_from_string_format(line,
                                                                                 counter as u8,
-                                                                                verify_signatures));
+                                                                                verify_signatures,
+                                                                                share_format));
         if verify_signatures {
             if sig_pair.is_none() {
                 return Err(RustyError::with_type(RustyErrorTypes::MissingSignature(share_index)));
