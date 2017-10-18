@@ -48,6 +48,21 @@ pub fn generate_shares(k: u8, n: u8, secret: &[u8], sign_shares: bool) -> io::Re
 
 /// Performs threshold k-out-of-n Shamir's secret sharing, returns as Protobuf or JSON encoded base64 strings.
 ///
+/// # Examples
+///
+/// ```
+/// use rusty_secrets::sss::generate_shares_format;
+/// use rusty_secrets::sss::ShareFormatKind;
+/// let secret = "These programs were never about terrorism: they’re about economic spying,
+///               social control, and diplomatic manipulation. They’re about power.".to_string();
+///
+/// match generate_shares_format(7, 10, &secret.into_bytes(), true, ShareFormatKind::Json){
+/// 	Ok(shares) => {
+/// 		// Do something with the shares
+/// 	},
+/// 	Err(_) => {}// Deal with error}
+/// }
+/// ```
 pub fn generate_shares_format(k: u8, n: u8, secret: &[u8], sign_shares: bool, share_format: ShareFormatKind) -> io::Result<Vec<String>> {
     if k > n {
         return Err(other_io_err("Threshold K can not be larger than N", None, None, None));

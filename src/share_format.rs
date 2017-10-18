@@ -11,7 +11,7 @@ use std::error::Error;
 use json_share_data::ShareDataJson;
 use serde_json;
 use sss::ShareFormatKind;
-
+use base64::{encode, decode};
 
 type ParsedShare = Result<(Vec<u8>, u8, u8, Option<(Vec<Vec<u8>>, Proof<MerklePublicKey>)>), RustyError>;
 
@@ -50,15 +50,15 @@ pub fn json_share_string_from(share: Vec<u8>, threshold: u8, share_num: u8,
                          signature_pair: Option<(Vec<Vec<u8>>, Proof<MerklePublicKey>)>)
                          -> String {
     let mut share_json = ShareDataJson{
-        shamir_data: share,
+        shamir_data: encode(&share),
         signature: None,
         proof: None,
     };
 
     if signature_pair.is_some() {
         let (signature, proof) = signature_pair.unwrap();
-        share_json.signature = Some(signature);
-        share_json.proof = Some(proof.write_to_bytes().unwrap());
+        share_json.signature = Some( signature.iter().map(|v| encode(&v) ).collect() );
+        share_json.proof = Some(encode(&proof.write_to_bytes().unwrap()));
     }
 
     let share_json_str = serde_json::to_string(&share_json).unwrap();

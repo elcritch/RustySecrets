@@ -2,13 +2,15 @@
 
 #[macro_use]
 use serde_derive;
+use serde::{Serializer, Deserialize, Deserializer};
 
-use serde_json::Error;
+#[macro_use]
+use base64_serde;
+
 
 #[derive(Serialize, Deserialize)]
 pub struct ShareDataJson {
-    // message fields
-    pub shamir_data: Vec<u8>,
-    pub signature: Option<Vec<Vec<u8>>>,
-    pub proof: Option<Vec<u8>>,
+    pub shamir_data: String,
+    pub signature: Option<Vec<String>>,
+    pub proof: Option<String>,
 }
