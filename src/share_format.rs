@@ -11,7 +11,7 @@ use std::error::Error;
 use json_share_data::ShareDataJson;
 use serde_json;
 use sss::ShareFormatKind;
-use base64::{encode, decode};
+use base64::{encode_config, decode_config, URL_SAFE};
 use std::str;
 
 pub type ParsedShare = Result<(Vec<u8>, u8, u8, Option<(Vec<Vec<u8>>, Proof<MerklePublicKey>)>), RustyError>;
@@ -51,15 +51,15 @@ pub fn json_share_string_from(share: Vec<u8>, threshold: u8, share_num: u8,
                          signature_pair: Option<(Vec<Vec<u8>>, Proof<MerklePublicKey>)>)
                          -> String {
     let mut share_json = ShareDataJson{
-        shamir_data: encode(&share),
+        shamir_data: encode_config(&share, URL_SAFE),
         signature: None,
         proof: None,
     };
 
     if signature_pair.is_some() {
         let (signature, proof) = signature_pair.unwrap();
-        share_json.signature = Some( signature.iter().map(|v| encode(&v) ).collect() );
-        share_json.proof = Some(encode(&proof.write_to_bytes().unwrap()));
+        share_json.signature = Some( signature.iter().map(|v| encode_config(&v, URL_SAFE) ).collect() );
+        share_json.proof = Some(encode_config(&proof.write_to_bytes().unwrap(), URL_SAFE));
     }
 
     let share_json_str = serde_json::to_string(&share_json).unwrap();
@@ -142,10 +142,10 @@ fn json_share_from_string(raw_data: Vec<u8>, index: u8, is_signed: bool, k: u8, 
 
     // println!("json_share_from_string: {:?}", json_data);
 
-    let share: Vec<u8> = decode(&json_data.shamir_data).unwrap();
+    let share: Vec<u8> = decode_config(&json_data.shamir_data, URL_SAFE).unwrap();
 
     if is_signed {
-        let p_bytes: Vec<u8> = decode(&json_data.proof.unwrap()).unwrap();
+        let p_bytes: Vec<u8> = decode_config(&json_data.proof.unwrap(), URL_SAFE).unwrap();
         let p_result = Proof::parse_from_bytes(&p_bytes, digest);
 
         let p_opt = p_result.unwrap();
@@ -158,7 +158,7 @@ fn json_share_from_string(raw_data: Vec<u8>, index: u8, is_signed: bool, k: u8, 
             value: MerklePublicKey::new(PublicKey::from_vec(p.value, digest).unwrap()),
         };
 
-        let signature: Vec<Vec<u8>> = json_data.signature.unwrap().iter().map(|s| decode(&s).unwrap()).collect();
+        let signature: Vec<Vec<u8>> = json_data.signature.unwrap().iter().map(|s| decode_config(&s, URL_SAFE).unwrap()).collect();
 
         Ok((share, k, n, Some((signature, proof))))
     } else {

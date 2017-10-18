@@ -5,9 +5,6 @@ use serde_derive;
 
 use serde::{Serialize, Deserialize, Deserializer};
 
-#[macro_use]
-use base64_serde;
-
 use serde_json::Error;
 
 

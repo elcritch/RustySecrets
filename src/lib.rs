@@ -15,9 +15,6 @@ extern crate merkle_sigs;
 extern crate ring;
 extern crate base64;
 
-#[macro_use]
-extern crate base64_serde;
-
 // base64_serde_type!(Base64Standard, STANDARD);
 
 use base64::{encode_config, STANDARD};
